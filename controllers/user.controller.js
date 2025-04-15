@@ -53,7 +53,7 @@ module.exports.signup = async(req, res) => {
 module.exports.login = async(req, res) => {
     try {
         const {email, password, role} = req.body
-        const user = await User.findOne({email, role})
+        const user = await User.findOne({email, role})  //////////////////////////////////////////////////////////////iska dekhna h ekbar
         if(!user){
             return res.status(400).json({
                 success : false,
@@ -127,14 +127,14 @@ module.exports.checkAuth = async(req, res) => {
     }
 }
 
-module.exports.sendVerificationEmail = async(req, res) => {
+module.exports.sendVerificationCode = async(req, res) => {
     try {
         const {email} = req.body;
         const user = await User.findOne({email})
         if(!user){
             return res.status(400).json({
                 success : false,
-                message : "Incorrect email or password"
+                message : "Incorrect email"
             });
         }
 

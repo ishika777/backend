@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const connectDb = require('./utils/db');
 
 const userRouter = require("./routes/user.routes")
+const jobRouter = require("./routes/job.routes")
+const applicationRouter = require("./routes/application.routes")
 
 const corsOption = {
     origin : process.env.FRONTEND_URL,
@@ -22,6 +24,9 @@ app.use(cors(corsOption));
 
 
 app.use("/api/user", userRouter)
+app.use("/api/job", jobRouter)
+app.use("/api/application", applicationRouter)
+
 
 
 
