@@ -22,19 +22,35 @@ module.exports.saveJob = async (req, res) => {
         }
 
         const job = await Job.find(id);
-        if(!job){
+        if (!job) {
             return res.status(404).json({
-                success : false,
-                message : "Job not found"
+                success: false,
+                message: "Job not found"
             });
         }
-        await SavedJob.create({
-            employee: user,
-            job
-        })
+        const savedJobs = await SavedJob.findOne({ employee: userId })
+        if (!savedJobs) {
+            await SavedJob.create({
+                employee: user,
+                jobs: [
+                    {
+                        job,
+                    }
+                ]
+            })
+        } else {
+            savedJobs.jobs.push({
+                job
+            })
+            await savedJobs.save();
+        }
+
+        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+
         return res.status(200).json({
-            success : true,
-            message: "Job is successfully saved!"
+            success: true,
+            message: "Job is successfully saved!",
+            allSavedJobs
         });
 
     } catch (error) {
@@ -45,9 +61,48 @@ module.exports.saveJob = async (req, res) => {
 
 module.exports.unsaveJob = async (req, res) => {
     try {
-       //send saved jobs after updating
+        const { id } = req.body;
+        const userId = req.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        if (user.role !== "Employee") {
+            return res.status(403).json({
+                success: false,
+                message: "User is not a Employee"
+            });
+        }
 
-       //save job me bhiiiiii, use update kr
+        const job = await Job.find(id);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found"
+            });
+        }
+        const savedJobs = await SavedJob.findOne({ employee: userId })
+        if (!savedJobs) {
+            return res.status(404).json({
+                success: false,
+                message: "No job saved"
+            });
+        }
+
+        savedJobs.jobs = savedJobs.jobs.filter(j => j.job.toString() !== id.toString());
+        await savedJobs.save();
+
+
+        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+
+        return res.status(200).json({
+            success: true,
+            message: "Job is successfully saved!",
+            allSavedJobs
+        });
 
     } catch (error) {
         console.log(error)
@@ -56,10 +111,27 @@ module.exports.unsaveJob = async (req, res) => {
 }
 module.exports.getSavedJobs = async (req, res) => {
     try {
-       const userId = req.id;
-       //is id se sari saved job fetch krni h
+        const userId = req.id;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        if (user.role !== "Employee") {
+            return res.status(403).json({
+                success: false,
+                message: "User is not a Employee"
+            });
+        }
 
-       //savedJobs bhejna h to frontend teeno me
+        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+        return res.status(200).json({
+            success: true,
+            allSavedJobs
+        });
+
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });

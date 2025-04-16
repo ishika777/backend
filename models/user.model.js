@@ -27,14 +27,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    url: [
-        {
+    url: {
             linkedIn: { type: String, required: true },
             gitHub: { type: String, required: true },
             twitter: { type: String },
             portfolio: { type: String },
-        }
-    ],
+        },
     experience: [
         {
             jobTitle: { type: String, required: true },

@@ -250,25 +250,33 @@ module.exports.resetpassword = async(req, res) => {
     }
 }
 
-// module.exports.updateProfile = async(req, res) => {
-//     try {
-//         const userId = req.id;
-//         const {fullname, email, address, city, country, profilePicture} = req.body;
-//         //upload image on cloudinary
-//         let cloudResponse:any;
-//         cloudResponse = await cloudinary.uploader.upload(profilePicture);
-//         const updatedData = {fullname, email, address, city, country, profilePicture}
-        
-//         const user = await User.findByIdAndUpdate(userId, updatedData, {new : true}).select("-password");
+module.exports.updatePersonalDetails = async(req, res) => {
+    try {
+        const userId = req.id;
+        const {fullname, contact, url} = req.body;
 
-//         return res.status(200).json({
-//             success : true,
-//             message : "Profile updated successfully",
-//             user
-//         });
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(400).json({
+                success : false,
+                message : "Incorrect email or password"
+            });
+        }
+        user.fullname = fullname;
+        user.contact = contact;
+        user.url = url;
+        await user.save();
 
-//     } catch (error) {
-//         console.log(error)
-//         return res.status(500).json({message : "Internal Server Error"});
-//     }
-// }
+        const updatedUser = await User.findById(userId);
+
+        return res.status(200).json({
+            success : true,
+            message : "Profile updated successfully",
+            updatedUser
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
