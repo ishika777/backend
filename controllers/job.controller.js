@@ -34,9 +34,10 @@ module.exports.newJob = async(req, res) => {
         return res.status(500).json({message : "Internal Server Error"});
     }
 }
-module.exports.getAllJobs = async(req, res) => {
+module.exports.getAllPostedJobs = async(req, res) => {
     try {
-        const recruiterId = req.id;
+
+        const {recruiterId} = req.params;
         const user = await User.findById(recruiterId);
         if(!user){
             return res.status(404).json({
@@ -61,6 +62,22 @@ module.exports.getAllJobs = async(req, res) => {
         return res.status(500).json({message : "Internal Server Error"});
     }
 }
+module.exports.getAllJobs = async(req, res) => {
+    try {
+        const today = new Date(); // Get today's date
+        const allJobs = await Job.find({ deadline: { $gt: today } }).populate("recruiterId");
+        allJobs.reverse(); // to show the latest job first
+        return res.status(200).json({
+            success : true,
+            allJobs
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
+
+
 
 module.exports.getJob = async(req, res) => {
     try {

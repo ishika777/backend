@@ -24,6 +24,10 @@ const applicationScheema = new mongoose.Schema({
         type: String,
         required: true
     },
+    appliedAt: {
+        type: Date,
+        default: Date.now,
+    },
 }, { timestamps: true })
 
 const Application = mongoose.model("Application", applicationScheema)
