@@ -280,3 +280,59 @@ module.exports.updatePersonalDetails = async(req, res) => {
         return res.status(500).json({message : "Internal Server Error"});
     }
 }
+
+module.exports.updateEducationalDetails = async(req, res) => {
+    try {
+        const userId = req.id;
+        const input = req.body;
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(400).json({
+                success : false,
+                message : "Incorrect email or password"
+            });
+        }
+        user.education = input;
+        await user.save();
+
+        const updatedUser = await User.findById(userId);
+
+        return res.status(200).json({
+            success : true,
+            message : "Profile updated successfully",
+            updatedUser
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
+
+module.exports.updateExperienceDetails = async(req, res) => {
+    try {
+        const userId = req.id;
+        const input = req.body;
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(400).json({
+                success : false,
+                message : "Incorrect email or password"
+            });
+        }
+        user.experience = input;
+        await user.save();
+
+        const updatedUser = await User.findById(userId);
+
+        return res.status(200).json({
+            success : true,
+            message : "Profile updated successfully",
+            updatedUser
+        });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
