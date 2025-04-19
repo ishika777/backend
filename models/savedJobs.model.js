@@ -8,6 +8,7 @@ const savedJobSchema = new mongoose.Schema({
     },
     jobs: [
         {
+            _id: false,
           job: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
           savedAt: { type: Date, default: Date.now }
         }

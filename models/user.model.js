@@ -28,13 +28,14 @@ const userSchema = new mongoose.Schema({
         default: ""
     },
     url: {
-            linkedIn: { type: String, required: true },
-            gitHub: { type: String, required: true },
-            twitter: { type: String },
-            portfolio: { type: String },
-        },
+        linkedIn: { type: String, required: true },
+        gitHub: { type: String, required: true },
+        twitter: { type: String },
+        portfolio: { type: String },
+    },
     experience: [
         {
+            _id: false,
             jobTitle: { type: String, required: true },
             companyName: { type: String, required: true },
             startDate: { type: Date, required: true },
@@ -44,6 +45,7 @@ const userSchema = new mongoose.Schema({
     ],
     education: [
         {
+            _id: false,
             degree: { type: String, required: true },
             institution: { type: String, required: true },
             startYear: { type: Number, required: true },

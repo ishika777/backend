@@ -1,7 +1,7 @@
 const User = require("../models/user.model.js");
 const bcrypt = require("bcryptjs")
 const crypto = require("crypto") 
-// import cloudinary from "../utils/cloudinary.js";
+const {uploadImageOnCloudinary, deleteImageFromCloudinary, deleteFileFromCloudinary, uploadFileOnCloudinary} = require("../utils/imageUpload.js")
 const { generateToken } = require("../utils/generateToken.js")
 const { generateVerificationCode } = require("../utils/generateVerificationCode.js")
 const { sendPasswordResetEmail, sendResetSuccessfulEmail, sendVerificationEmail, sendWelcomeEmail } = require("../mailtrap/email.js")
@@ -253,8 +253,7 @@ module.exports.resetpassword = async(req, res) => {
 module.exports.updatePersonalDetails = async(req, res) => {
     try {
         const userId = req.id;
-        const {fullname, contact, url} = req.body;
-
+        const {fullname, contact, linkedIn, gitHub, twitter, portfolio} = req.body;
         const user = await User.findById(userId);
         if(!user){
             return res.status(400).json({
@@ -262,9 +261,31 @@ module.exports.updatePersonalDetails = async(req, res) => {
                 message : "Incorrect email or password"
             });
         }
+
+        if (req.files?.resume?.[0]) {
+            // if (user.resume) {
+            //     await deleteFileFromCloudinary(user.resume); 
+            // }
+            const result = await uploadFileOnCloudinary(req.files.resume[0]);
+            console.log(result)
+            user.resume = result.public_id;
+        }
+
+        if (req.files?.profilePicture?.[0]) {
+            if (user.profilePicture) {
+                await deleteImageFromCloudinary(user.profilePicture); // Deletes previous image
+            }
+            const imageUrl = await uploadImageOnCloudinary(req.files.profilePicture[0]);
+            user.profilePicture = imageUrl;
+        }
         user.fullname = fullname;
         user.contact = contact;
-        user.url = url;
+        user.url = {
+            linkedIn,
+            gitHub,
+            twitter,
+            portfolio
+        }
         await user.save();
 
         const updatedUser = await User.findById(userId);

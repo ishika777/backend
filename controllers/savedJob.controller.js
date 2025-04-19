@@ -21,31 +21,34 @@ module.exports.saveJob = async (req, res) => {
             });
         }
 
-        const job = await Job.find(id);
+        const job = await Job.findById(id);
         if (!job) {
             return res.status(404).json({
                 success: false,
                 message: "Job not found"
             });
         }
+
         const savedJobs = await SavedJob.findOne({ employee: userId })
         if (!savedJobs) {
             await SavedJob.create({
                 employee: user,
-                jobs: [
-                    {
-                        job,
-                    }
-                ]
+                jobs: [{
+                    job: job._id,
+                }]
             })
         } else {
-            savedJobs.jobs.push({
-                job
-            })
-            await savedJobs.save();
+            const alreadySaved = savedJobs.jobs.some(j => j.job.toString() === job._id.toString());
+            if (!alreadySaved) {
+                savedJobs.jobs.push({
+                    job: job._id,
+                });
+                await savedJobs.save();
+            }
+            
         }
 
-        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+        const allSavedJobs = await SavedJob.findOne({ employee: userId }).populate('jobs.job');
 
         return res.status(200).json({
             success: true,
@@ -77,7 +80,7 @@ module.exports.unsaveJob = async (req, res) => {
             });
         }
 
-        const job = await Job.find(id);
+        const job = await Job.findById(id);
         if (!job) {
             return res.status(404).json({
                 success: false,
@@ -93,14 +96,18 @@ module.exports.unsaveJob = async (req, res) => {
         }
 
         savedJobs.jobs = savedJobs.jobs.filter(j => j.job.toString() !== id.toString());
-        await savedJobs.save();
+        if (savedJobs.jobs.length === 0) {
+            await SavedJob.deleteOne({ _id: savedJobs._id });
+        } else {
+            await savedJobs.save();
+        }
 
 
-        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+        const allSavedJobs = await SavedJob.findOne({ employee: userId }).populate('jobs.job');
 
         return res.status(200).json({
             success: true,
-            message: "Job is successfully saved!",
+            message: "Job is successfully unsaved!",
             allSavedJobs
         });
 
@@ -126,7 +133,7 @@ module.exports.getSavedJobs = async (req, res) => {
             });
         }
 
-        const allSavedJobs = await SavedJob.findOne({ employee: userId });
+        const allSavedJobs = await SavedJob.findOne({ employee: userId }).populate('jobs.job');
         return res.status(200).json({
             success: true,
             allSavedJobs
