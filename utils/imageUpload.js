@@ -1,21 +1,22 @@
 const cloudinary = require("./cloudinary");
+const path = require("path")
 
 const extractPublicId = (url) => {
     const parts = url.split('/');
-    const fileName = parts.pop(); 
-    const folder = parts.pop(); 
-    const publicId = `${folder}/${fileName.split('.')[0]}`; 
+    const fileName = parts.pop();
+    const folder = parts.pop();
+    const publicId = `${folder}/${fileName.split('.')[0]}`;
     return publicId;
 }
 
-module.exports.uploadImageOnCloudinary = async(file) => {
+module.exports.uploadImageOnCloudinary = async (file) => {
     const base64Image = Buffer.from(file.buffer).toString("base64")
     const dataUri = `data:${file.mimetype};base64,${base64Image}`
 
     const uploadResponse = await cloudinary.uploader.upload(dataUri, {
         folder: "SkillSort",
         resource_type: "auto" // optional, handles both images and videos
-      })
+    })
     return uploadResponse.secure_url
 }
 
@@ -26,27 +27,54 @@ module.exports.deleteImageFromCloudinary = async (imageUrl) => {
 
 
 module.exports.uploadFileOnCloudinary = async (file) => {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            {
-                resource_type: "raw",  // For non-image files like PDFs
-                folder: "SkillSort/resumes", // Folder to store files in
-                use_filename: true,  // Keep the original filename
-                unique_filename: false, // Don't generate unique filenames
-                overwrite: true,  // Overwrite files with the same name
-                public_id: file.originalname.split('.')[0], 
-            },
-            (error, result) => {
-                if (error) {
-                    reject(new Error(error)); // Reject the promise if the upload fails
-                } else {
-                    resolve(result); // Resolve the promise with the secure URL
+    try {
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: "SkillSort/resumes",
+                    use_filename: true,
+                    unique_filename: false,
+                    overwrite: true,
+                    public_id: file.originalname,
+                    format: "pdf"
+                },
+                (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
                 }
-            }
-        );
-        stream.end(file.buffer);
-    });
+            );
+            stream.end(file.buffer);
+        });
+        console.log("File uploaded successfully:", result.public_id);
+        return result;
+    } catch (error) {
+        console.error("Error uploading file to Cloudinary:", error);
+        throw new Error("Failed to upload file");
+    }
 };
+
+    module.exports.downloadPdfFromCloudinary = async (publicId) => {
+        try {
+            const url = cloudinary.url(publicId, {
+                // resource_type: "raw", 
+                format: "pdf", 
+                flags: "attachment", 
+                secure: true
+            });
+            return url;
+        } catch (error) {
+            console.error("Error downloading file from Cloudinary:", error);
+            throw new Error("Failed to download file");
+        }
+    };
+
+
+
+
+
 
 
 
@@ -54,7 +82,7 @@ module.exports.uploadFileOnCloudinary = async (file) => {
 
 module.exports.deleteFileFromCloudinary = async (fileUrl) => {
     try {
-        const publicId = fileUrl.split("/").pop().split(".")[0];        
+        const publicId = fileUrl.split("/").pop().split(".")[0];
         const result = await cloudinary.uploader.destroy(publicId, {
             resource_type: "raw"
         });

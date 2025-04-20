@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const { checkAuth, signup, login, logout, verifyEmail, forgotPassword, resetpassword, sendVerificationCode, updatePersonalDetails, updateEducationalDetails, updateExperienceDetails } = require("../controllers/user.controller")
+const { checkAuth, signup, login, logout, verifyEmail, forgotPassword, resetpassword, sendVerificationCode, updatePersonalDetails, updateEducationalDetails, updateExperienceDetails, downloadResume } = require("../controllers/user.controller")
 const { isAuthenticated } = require("../middlewares/isAuthenticated")
 const upload = require("../middlewares/multer")
 
@@ -20,12 +20,9 @@ router.route("/profile/update/personal").put(isAuthenticated, upload.fields([{ n
 router.route("/profile/update/education").put(isAuthenticated, updateEducationalDetails)
 router.route("/profile/update/experience").put(isAuthenticated, updateExperienceDetails)
 
-router.get('/download-resume/:publicId(*)', (req, res) => {
-    const { publicId } = req.params;
-    // Construct the correct Cloudinary URL for the file
-    const cloudinaryUrl = `https://res.cloudinary.com/ishika05/raw/upload/v1744989076/SkillSort/resume/${publicId}.pdf`;
-    res.redirect(cloudinaryUrl); // Redirect the user to the Cloudinary file URL
-});
+
+router.route("/resume/download").get(isAuthenticated, downloadResume)
+
 
 
 

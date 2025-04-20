@@ -77,8 +77,6 @@ module.exports.getAllJobs = async(req, res) => {
     }
 }
 
-
-
 module.exports.getJob = async(req, res) => {
     try {
         const { id } = req.body;
@@ -112,6 +110,7 @@ module.exports.getJob = async(req, res) => {
         return res.status(500).json({message : "Internal Server Error"});
     }
 }
+
 module.exports.editJob = async(req, res) => {
     try {
         const {id, title, jobType, description, skills, experience, qualification, location, salary, deadline, openings} = req.body;
@@ -153,6 +152,41 @@ module.exports.editJob = async(req, res) => {
         return res.status(500).json({message : "Internal Server Error"});
     }
 }
+
+module.exports.applyFilter = async(req, res) => {
+    try {
+        const { jobType, experience, qualification, location, skills, salary} = req.body;
+        const query = {};
+        if (jobType.length > 0) {
+            query.jobType = { $in: jobType };
+        }
+        if (experience.length > 0) {
+            query.experience = { $in: experience };
+        }
+        if (qualification.length > 0) {
+            query.qualification = { $in: qualification };
+        }
+        if (location.length > 0) {
+            query.location = { $in: location };
+        }
+        if (skills.length > 0) {
+            query.skills = { $all: skills };
+        }
+        if (salary.length === 2) {
+            query.salary = { $gte: salary[0], $lte: salary[1] };
+        }
+        const filteredJobs = await Job.find(query);
+
+        return res.status(200).json({ jobs: filteredJobs });
+
+       
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({message : "Internal Server Error"});
+    }
+}
+
+
 
 
 
