@@ -5,7 +5,7 @@ const cloudinary = require('cloudinary').v2;
 const https = require('https');
 const axios = require("axios")
 
-const { uploadImageOnCloudinary, deleteImageFromCloudinary, deleteFileFromCloudinary, uploadFileOnCloudinary, downloadPdfFromCloudinary } = require("../utils/imageUpload.js")
+const { uploadImageOnCloudinary, deleteImageFromCloudinary, deleteFileFromCloudinary, uploadFileOnCloudinary } = require("../utils/imageUpload.js")
 const { generateToken } = require("../utils/generateToken.js")
 const { generateVerificationCode } = require("../utils/generateVerificationCode.js")
 const { sendPasswordResetEmail, sendResetSuccessfulEmail, sendVerificationEmail, sendWelcomeEmail } = require("../mailtrap/email.js")
@@ -267,11 +267,14 @@ module.exports.updatePersonalDetails = async (req, res) => {
         }
 
         if (req.files?.resume?.[0]) {
-            // if (user.resume) {
-            //     await deleteFileFromCloudinary(user.resume); 
-            // }
+            if (user.resume.url && user.resume.publicId) {
+                await deleteFileFromCloudinary(user.resume.publicId); 
+            }
             const result = await uploadFileOnCloudinary(req.files.resume[0]);
-            user.resume = result.public_id;
+            user.resume = {
+                url: result.secure_url,
+                publicId: result.public_id
+            }
         }
 
         if (req.files?.profilePicture?.[0]) {
@@ -305,22 +308,6 @@ module.exports.updatePersonalDetails = async (req, res) => {
     }
 }
 
-
-module.exports.downloadResume = async (req, res) => {
-    try {
-        const userId = req.id; 
-        const user = await User.findById(userId);
-        
-        if (!user || !user.resume) {
-            return res.status(404).json({ message: "Resume not found" });
-        }
-        const pdfUrl = await downloadPdfFromCloudinary(user.resume);
-        res.send(pdfUrl);
-    } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-};
 
 
 

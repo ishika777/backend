@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const { checkAuth, signup, login, logout, verifyEmail, forgotPassword, resetpassword, sendVerificationCode, updatePersonalDetails, updateEducationalDetails, updateExperienceDetails, downloadResume } = require("../controllers/user.controller")
+const { checkAuth, signup, login, logout, verifyEmail, forgotPassword, resetpassword, sendVerificationCode, updatePersonalDetails, updateEducationalDetails, updateExperienceDetails } = require("../controllers/user.controller")
 const { isAuthenticated } = require("../middlewares/isAuthenticated")
 const upload = require("../middlewares/multer")
 
@@ -21,7 +21,6 @@ router.route("/profile/update/education").put(isAuthenticated, updateEducational
 router.route("/profile/update/experience").put(isAuthenticated, updateExperienceDetails)
 
 
-router.route("/resume/download").get(isAuthenticated, downloadResume)
 
 
 

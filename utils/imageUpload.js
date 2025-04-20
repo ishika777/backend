@@ -48,7 +48,6 @@ module.exports.uploadFileOnCloudinary = async (file) => {
             );
             stream.end(file.buffer);
         });
-        console.log("File uploaded successfully:", result.public_id);
         return result;
     } catch (error) {
         console.error("Error uploading file to Cloudinary:", error);
@@ -56,35 +55,11 @@ module.exports.uploadFileOnCloudinary = async (file) => {
     }
 };
 
-    module.exports.downloadPdfFromCloudinary = async (publicId) => {
-        try {
-            const url = cloudinary.url(publicId, {
-                // resource_type: "raw", 
-                format: "pdf", 
-                flags: "attachment", 
-                secure: true
-            });
-            return url;
-        } catch (error) {
-            console.error("Error downloading file from Cloudinary:", error);
-            throw new Error("Failed to download file");
-        }
-    };
 
-
-
-
-
-
-
-
-
-
-module.exports.deleteFileFromCloudinary = async (fileUrl) => {
+module.exports.deleteFileFromCloudinary = async (publicId) => {
     try {
-        const publicId = fileUrl.split("/").pop().split(".")[0];
         const result = await cloudinary.uploader.destroy(publicId, {
-            resource_type: "raw"
+            format: "pdf"
         });
         return result;
     } catch (error) {

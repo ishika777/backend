@@ -16,13 +16,13 @@ const applicationScheema = new mongoose.Schema({
         enum: ["Applied", "Shortlisted", "Interviewed", "Selected", "Rejected"],
         default: "Applied"
     },
-    resumeLink: {
-        type: String,
-        required: true
+    resume: {
+        url: { type: String, default: "" },
+        publicId: { type: String, default: "" }
     },
-    coverLetterLink: {
-        type: String,
-        required: true
+    coverLetter: {
+        url: { type: String, default: "" },
+        publicId: { type: String, default: "" }
     },
     appliedAt: {
         type: Date,
