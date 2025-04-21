@@ -1,9 +1,6 @@
 const User = require("../models/user.model.js");
 const bcrypt = require("bcryptjs")
 const crypto = require("crypto")
-const cloudinary = require('cloudinary').v2;
-const https = require('https');
-const axios = require("axios")
 
 const { uploadImageOnCloudinary, deleteImageFromCloudinary, deleteFileFromCloudinary, uploadFileOnCloudinary } = require("../utils/imageUpload.js")
 const { generateToken } = require("../utils/generateToken.js")
@@ -13,7 +10,7 @@ const { sendPasswordResetEmail, sendResetSuccessfulEmail, sendVerificationEmail,
 
 module.exports.signup = async (req, res) => {
     try {
-        const { fullname, email, password, contact, resume, profilePicture, url, experience, education, role } = req.body;
+        const { fullname, email, password, contact, url, experience, education, role } = req.body;
 
         let user = await User.findOne({ email })
         if (user) {
@@ -31,8 +28,6 @@ module.exports.signup = async (req, res) => {
             email,
             password: hashedPassword,
             contact,
-            resume,
-            profilePicture,
             url,
             experience,
             education,
@@ -40,14 +35,31 @@ module.exports.signup = async (req, res) => {
             verificationCode,
             verificationCodeExpiresAt: Date.now() + 24 * 60 * 60 * 1000 //1day
         })
+        if (req.files?.resume?.[0]) {
+            const result = await uploadFileOnCloudinary(req.files.resume[0]);
+            user.resume = {
+                url: result.secure_url,
+                publicId: result.public_id
+            }
+            await user.save();
+        }
+
+        if (req.files?.profilePicture?.[0]) {
+            const imageUrl = await uploadImageOnCloudinary(req.files.profilePicture[0]);
+            user.profilePicture = imageUrl;
+            await user.save();
+        }
+
         generateToken(res, user)
-        await sendVerificationEmail(email, verificationCode)
+        // await sendVerificationEmail(email, verificationCode)
+
         const userWithoutPassword = await User.findOne({ email }).select("-password")
         return res.status(201).json({
             success: true,
             message: "Account created successfully",
             user: userWithoutPassword
         });
+
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: "Internal Server Error" });
@@ -150,7 +162,7 @@ module.exports.sendVerificationCode = async (req, res) => {
         }
 
         const verificationCode = generateVerificationCode(6)
-        await sendVerificationEmail(email, verificationCode)
+        // await sendVerificationEmail(email, verificationCode)
         user.verificationCode = verificationCode;
         user.verificationCodeExpiresAt = Date.now() + 24 * 60 * 60 * 1000 //1day
         await user.save()
@@ -181,7 +193,7 @@ module.exports.verifyEmail = async (req, res) => {
         user.verificationCodeExpiresAt = undefined;
         await user.save()
 
-        await sendWelcomeEmail(user.email, user.fullname)
+        // await sendWelcomeEmail(user.email, user.fullname)
 
         return res.status(200).json({
             success: true,
@@ -211,7 +223,7 @@ module.exports.forgotPassword = async (req, res) => {
         user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
         await user.save()
 
-        await sendPasswordResetEmail(user.email, `${process.env.FRONTEND_URL}/reset-password/${resetToken}`)
+        // await sendPasswordResetEmail(user.email, `${process.env.FRONTEND_URL}/reset-password/${resetToken}`)
         return res.status(200).json({
             success: true,
             message: "Password reset link sent to your email"
@@ -241,7 +253,7 @@ module.exports.resetpassword = async (req, res) => {
         user.resetPasswordTokenExpiresAt = undefined;
         await user.save();
 
-        await sendResetSuccessfulEmail(user.email)
+        // await sendResetSuccessfulEmail(user.email)
 
         return res.status(200).json({
             success: true,
@@ -307,27 +319,6 @@ module.exports.updatePersonalDetails = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports.updateEducationalDetails = async (req, res) => {
     try {
