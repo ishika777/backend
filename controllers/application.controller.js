@@ -4,7 +4,7 @@ const User = require("../models/user.model.js");
 
 const { uploadFileOnCloudinary } = require("../utils/imageUpload.js")
 
-
+//recruiters can see all the applications they have received for their jobs
 module.exports.getAllApplications = async (req, res) => {
     try {
         const recruiterId = req.id;
@@ -35,6 +35,7 @@ module.exports.getAllApplications = async (req, res) => {
     }
 }
 
+//recruiters can see all the applications they have received for their jobs
 module.exports.getAllApplicants = async (req, res) => {
     try {
         const recruiterId = req.id;
@@ -73,6 +74,7 @@ module.exports.getAllApplicants = async (req, res) => {
     }
 }
 
+
 module.exports.applyForJob = async (req, res) => {
     try {
         const userId = req.id;
@@ -93,7 +95,7 @@ module.exports.applyForJob = async (req, res) => {
         if (user.role !== "Employee") {
             return res.status(403).json({
                 success: false,
-                message: "User is not a recruiter"
+                message: "User is not an employee"
             });
         }
         const job = await Job.findById(jobId).populate("recruiterId");
@@ -107,8 +109,7 @@ module.exports.applyForJob = async (req, res) => {
         if (resumeOption === "profile") {
             resumeLink = req.body.resumeUrl;
             resumePublicId = req.body.resumePublicId;
-        }
-        if (resumeOption === "upload" && req.files?.resume) {
+        }else if (resumeOption === "upload" && req.files?.resume) {
             const result = await uploadFileOnCloudinary(req.files.resume[0]);
             resumeLink = result.secure_url;
             resumePublicId = result.public_id;
@@ -120,7 +121,7 @@ module.exports.applyForJob = async (req, res) => {
             coverLetterPublicId = result.public_id;
         }
 
-        const application = await Application.create({
+        await Application.create({
             jobId,
             userId,
             status: "Applied",
@@ -139,7 +140,7 @@ module.exports.applyForJob = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Application submitted successfully",
-            application,
+            applications,
         });
 
     } catch (error) {
@@ -147,7 +148,6 @@ module.exports.applyForJob = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
 
 module.exports.getAllAppliedJobs = async (req, res) => {
     try {
