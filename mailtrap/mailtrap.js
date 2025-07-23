@@ -7,5 +7,5 @@ module.exports.client = new MailtrapClient({
 
 module.exports.sender = {
   email: "hello@demomailtrap.com",
-  name: "SkillSort",
+  name: "backend",
 };

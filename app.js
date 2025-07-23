@@ -7,25 +7,27 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const connectDb = require('./utils/db');
 
+const orderRouter = require("./routes/order.routes")
 const userRouter = require("./routes/user.routes")
-const jobRouter = require("./routes/job.routes")
-const applicationRouter = require("./routes/application.routes")
+const sellerRouter = require("./routes/seller.routes")
+const adminRouter = require("./routes/admin.routes")
 
-const corsOption = {
-    origin : process.env.FRONTEND_URL,
-    credentials : true
-}
 
-app.use(bodyParser.json({limit : "10mb"}));
-app.use(express.urlencoded({extended : true, limit : "10mb"}));
+app.use(bodyParser.json());
+app.use(express.urlencoded({extended : true}));
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors(corsOption));
+app.use(cors({
+    origin : "*",
+    credentials : true
+}));
 
 
-app.use("/api/user", userRouter)
-app.use("/api/job", jobRouter)
-app.use("/api/application", applicationRouter)
+
+app.use("/auth", userRouter)
+app.use("/orders", orderRouter)
+app.use("/seller", sellerRouter)
+app.use("/admin/users", adminRouter)
 
 
 

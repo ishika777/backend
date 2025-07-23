@@ -47,46 +47,4 @@ module.exports.sendWelcomeEmail = async(email, name) => {
     }
 }
 
-module.exports.sendPasswordResetEmail = async(email, resetUrl) => {
-    const recipients = [
-        {
-          email
-        }
-    ];
-    const htmlContent = generatePasswordResetEmailHtml(resetUrl);
-    try {
-        const response = await client.send({
-            from: sender,
-            to: recipients,
-            subject: "Reset Your Passwrod",
-            html : htmlContent,
-            category: "Reset Password",
-        })
-    } catch (error) {
-        console.log(error)
-        throw new Error("Failed to reset password")
-    }
-}
-
-module.exports.sendResetSuccessfulEmail = async(email) => {
-    const recipients = [
-        {
-          email
-        }
-    ];
-    const htmlContent = generateResetSuccessEmailHtml();
-    try {
-        const response = await client.send({
-            from: sender,
-            to: recipients,
-            subject: "Password Reset Succesfully",
-            html : htmlContent,
-            category: "Password Reset",
-        })
-    .then(console.log, console.error);
-    } catch (error) {
-        console.log(error)
-        throw new Error("Failed to send password reset success email")
-    }
-}
 
