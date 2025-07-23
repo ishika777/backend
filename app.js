@@ -40,9 +40,22 @@ app.use("/orders", orderRouter);
 app.use("/seller", sellerRouter);
 app.use("/admin/users", adminRouter);
 
-// Socket.IO connection handler
+//listen on frontend
+
+// socket.on("productSold", (data) => {
+//     console.log("Product sold notification received:", data);
+//     alert(`Product ${data.productId} has been marked as sold!`);
+// });
+
+// socket.on("newSignup", (data) => {
+//     console.log("New user signed up:", data);
+//     alert(`New user signed up: ${data.email} (${data.role})`);
+// });
+
+
 io.on('connection', (socket) => {
     console.log('A user connected, socket id:', socket.id);
+
 
     socket.on('disconnect', () => {
         console.log('User disconnected, socket id:', socket.id);

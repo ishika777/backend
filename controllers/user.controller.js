@@ -13,7 +13,7 @@ module.exports.signup = async (req, res) => {
         const { email, password, role } = req.body;
 
         if (!email || !password || !role) {
-            return res.status(400).json({   
+            return res.status(400).json({
                 success: false,
                 message: "All fields are required"
             });
@@ -48,6 +48,14 @@ module.exports.signup = async (req, res) => {
 
 
         await sendVerificationEmail(email, verificationCode)
+
+        const io = req.app.locals.io;
+        io.emit('newSignup', {
+            userId: user._id,
+            email: user.email,
+            role: user.role,
+            message: 'New user signed up'
+        });
 
         const userWithoutPassword = await User.findOne({ email }).select("-password")
         return res.status(201).json({
